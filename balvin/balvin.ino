@@ -14,7 +14,8 @@
 #include <DallasTemperature.h>
 #include <EEPROM.h>
 #include "GravityTDS.h"
-
+//#define ssid "BAGABAGA"
+//#define pass "123456789"
 #define ssid "Cinta Biak"
 #define pass "Utha23042211"
 // #define ssid "WCP"
@@ -42,7 +43,7 @@ FirebaseJson json;
 String UID, path, tdsPath, tempPath;
 String hour[5], minute[5], status[5];
 
-int count;
+int count,j;
 int currentHour, currentMinute, currentDay[3], currentSecond;
 
 WiFiUDP ntpUDP;
@@ -59,6 +60,18 @@ float temp = 0, tdsValue, temperature = 0;
 OneWire oneWire(tempPin);
 DallasTemperature sensors(&oneWire);
 GravityTDS tds;
+
+byte smile[8] = 
+              {
+                0b00000,
+                0b00000,
+                0b01010,
+                0b00000,
+                0b10001,
+                0b01110,
+                0b00000,
+                0b00000
+              };
 
 void initWiFi(){
   WiFi.begin(ssid, pass);
@@ -161,6 +174,7 @@ void setup() {
   getSchedule(3);
   getSchedule(4);
   lcd.clear();
+  
   lcd.setCursor(5,0);
   lcd.print("System");
   lcd.setCursor(4,1);
@@ -189,6 +203,7 @@ void loop() {
   verifyTime(3);
   verifyTime(4);
   setValue();
+  reconnect();
   digitalWrite(led, LOW);
 }
 
@@ -297,10 +312,11 @@ void verifyTime(int i){
   while(hour[i] != ""){
     if(hour[i].toInt() == currentHour && minute[i].toInt() == currentMinute && status[i] == "Belum"){
         Serial.println("feeding");
-        feeding();
+        feeding(15);
         if(Firebase.RTDB.setString(&db, statusPath, "Sudah")){
           status[i] = "Sudah";
-          break;
+//          break;
+          lcd.clear();
         }
     }
     else{
@@ -309,19 +325,34 @@ void verifyTime(int i){
   }
 
   while(currentDay[0] != currentDay[1]){
-    if(Firebase.RTDB.setString(&db, statusPath, "Belum")){
+    if(Firebase.RTDB.setString(&db, statusPath, "Belum") && j < 3){
           Serial.println("Day changed");
-          currentDay[1] = currentDay[0];
-          // break;
+          j += 1;
+          break;
     }
-  }  
+    
+    if(j >= 3){
+      Serial.println("status changed");
+      currentDay[1] = currentDay[0];
+      j = 0;
+    }
+  }    
 }
 
-void feeding(){
-  myServo.write(90);
-  delay(500);
-  myServo.write(0);
-  delay(500);
+void feeding(int iteration){
+  lcd.clear();
+  lcd.createChar(1, smile);
+  lcd.setCursor(1,0);
+  lcd.write(1);
+  lcd.print("Happy Feeding");
+  lcd.write(1);
+  for (int i = 0; i < iteration; i++){
+    myServo.write(120);
+    delay(500);
+    myServo.write(0);
+    delay(500);
+  }
+  
 }
 
 void monitoring(){
@@ -354,4 +385,14 @@ void readSensor()
   tds.setTemperature(temperature);
   tds.update();
   tdsValue = tds.getTdsValue();
+}
+
+void reconnect(){
+  
+  while(WiFi.status() != WL_CONNECTED){
+    lcd.clear();
+    lcd.setCursor(2,0);
+    lcd.print("Reconnecting");
+    ESP.restart();
+  }
 }
