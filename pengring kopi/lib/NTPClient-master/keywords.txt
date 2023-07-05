@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #######################################
 # Datatypes (KEYWORD1)
 #######################################
@@ -18,3 +19,25 @@ getMinutes	KEYWORD2
 getSeconds	KEYWORD2
 getFormattedTime	KEYWORD2
 getEpochTime	KEYWORD2
+=======
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+NTPClient	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin	KEYWORD2
+end	KEYWORD2
+update	KEYWORD2
+forceUpdate	KEYWORD2
+getDay	KEYWORD2
+getHours	KEYWORD2
+getMinutes	KEYWORD2
+getSeconds	KEYWORD2
+getFormattedTime	KEYWORD2
+getEpochTime	KEYWORD2
+>>>>>>> 9f4c145668b6fb6c7976d9e7904c2a03d2dd6554
